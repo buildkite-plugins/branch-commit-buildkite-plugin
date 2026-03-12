@@ -53,6 +53,7 @@ setup() {
 @test "Commit is on branch in non-shallow repo succeeds" {
   stub git \
     "rev-parse --is-shallow-repository : echo false" \
+    "fetch origin main : " \
     "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout

@@ -29,9 +29,11 @@ if [[ "$mode" != "warn" && "$mode" != "strict" ]]; then
   exit 1
 fi
 
-# Deepen history so merge-base can walk the commit graph
+# Fetch branch ref and history so merge-base can walk the commit graph
 if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
   git fetch --unshallow origin "$BUILDKITE_BRANCH"
+else
+  git fetch origin "$BUILDKITE_BRANCH"
 fi
 
 if ! git merge-base --is-ancestor "$BUILDKITE_COMMIT" "origin/$BUILDKITE_BRANCH"; then
