@@ -45,7 +45,9 @@ setup() {
   run "$PWD"/hooks/post-checkout
 
   assert_success
-  assert_output ""
+  assert_output --partial "INFO: Shallow repository detected"
+  assert_output --partial "INFO: Commit abc123 exists on branch main."
+  assert_output --partial "Continuing job..."
 
   unstub git
 }
@@ -59,7 +61,9 @@ setup() {
   run "$PWD"/hooks/post-checkout
 
   assert_success
-  assert_output ""
+  refute_output --partial "Shallow repository detected"
+  assert_output --partial "INFO: Commit abc123 exists on branch main."
+  assert_output --partial "Continuing job..."
 
   unstub git
 }
@@ -74,6 +78,7 @@ setup() {
 
   assert_success
   assert_output --partial "WARNING: Commit abc123 is not on branch main."
+  assert_output --partial "Continuing job..."
 
   unstub git
 }
@@ -90,6 +95,7 @@ setup() {
 
   assert_failure
   assert_output --partial "ERROR: Commit abc123 is not on branch main."
+  assert_output --partial "Failing job..."
 
   unstub git
 }
@@ -103,6 +109,7 @@ setup() {
 
   assert_success
   assert_output --partial "WARNING: Commit abc123 is not on branch main."
+  assert_output --partial "Continuing job..."
 
   unstub git
 }
@@ -118,6 +125,7 @@ setup() {
 
   assert_failure
   assert_output --partial "ERROR: Commit abc123 is not on branch main."
+  assert_output --partial "Failing job..."
 
   unstub git
 }
@@ -133,7 +141,8 @@ setup() {
   run "$PWD"/hooks/post-checkout
 
   assert_success
-  assert_output ""
+  assert_output --partial "INFO: Commit abc123 exists on branch main."
+  assert_output --partial "Continuing job..."
 
   unstub git
 }
