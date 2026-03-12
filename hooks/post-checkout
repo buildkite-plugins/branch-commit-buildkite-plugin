@@ -38,11 +38,13 @@ else
 fi
 
 if [[ "$fetch_failed" -eq 1 ]] || ! git merge-base --is-ancestor "$BUILDKITE_COMMIT" "origin/$BUILDKITE_BRANCH" 2>/dev/null; then
-	echo "~~~ Validating branch commit"
+	echo "+++ :mag: Validating branch commit"
   if [[ "$mode" == "strict" ]]; then
     echo "ERROR: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
+		echo "Failing job..."
     exit 1
   else
     echo "WARNING: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
+		echo "Continuing job..."
   fi
 fi
