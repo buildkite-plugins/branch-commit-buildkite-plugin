@@ -94,6 +94,34 @@ setup() {
   unstub git
 }
 
+@test "Fetch failure in warn mode prints warning" {
+  stub git \
+    "rev-parse --is-shallow-repository : echo false" \
+    "fetch origin main : exit 128"
+
+  run "$PWD"/hooks/post-checkout
+
+  assert_success
+  assert_output --partial "WARNING: Commit abc123 is not on branch main."
+
+  unstub git
+}
+
+@test "Fetch failure in strict mode fails with error" {
+  export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="strict"
+
+  stub git \
+    "rev-parse --is-shallow-repository : echo false" \
+    "fetch origin main : exit 128"
+
+  run "$PWD"/hooks/post-checkout
+
+  assert_failure
+  assert_output --partial "ERROR: Commit abc123 is not on branch main."
+
+  unstub git
+}
+
 @test "Matching branch in strict mode succeeds" {
   export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="strict"
 
