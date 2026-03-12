@@ -29,14 +29,16 @@ if [[ "$mode" != "warn" && "$mode" != "strict" ]]; then
   exit 1
 fi
 
-current_commit=$(git rev-parse "$BUILDKITE_COMMIT")
-commit_branch=$(git name-rev --name-only "$current_commit")
+# Deepen history so merge-base can walk the commit graph
+if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+  git fetch --unshallow origin "$BUILDKITE_BRANCH"
+fi
 
-if [[ "$commit_branch" != "$BUILDKITE_BRANCH" ]]; then
+if ! git merge-base --is-ancestor "$BUILDKITE_COMMIT" "origin/$BUILDKITE_BRANCH"; then
   if [[ "$mode" == "strict" ]]; then
-    echo "ERROR: Commit branch ($commit_branch) does not match BUILDKITE_BRANCH ($BUILDKITE_BRANCH)." >&2
+    echo "ERROR: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
     exit 1
   else
-    echo "WARNING: Commit branch ($commit_branch) does not match BUILDKITE_BRANCH ($BUILDKITE_BRANCH)." >&2
+    echo "WARNING: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
   fi
 fi
