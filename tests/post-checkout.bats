@@ -36,10 +36,24 @@ setup() {
   assert_output --partial "ERROR: BUILDKITE_COMMIT environment variable is not set."
 }
 
-@test "Matching branch succeeds" {
+@test "Commit is on branch in shallow repo succeeds" {
   stub git \
-    "rev-parse abc123 : echo abc123" \
-    "name-rev --name-only abc123 : echo main"
+    "rev-parse --is-shallow-repository : echo true" \
+    "fetch --unshallow origin main : " \
+    "merge-base --is-ancestor abc123 origin/main : "
+
+  run "$PWD"/hooks/post-checkout
+
+  assert_success
+  assert_output ""
+
+  unstub git
+}
+
+@test "Commit is on branch in non-shallow repo succeeds" {
+  stub git \
+    "rev-parse --is-shallow-repository : echo false" \
+    "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout
 
@@ -51,13 +65,14 @@ setup() {
 
 @test "Branch mismatch in warn mode prints warning" {
   stub git \
-    "rev-parse abc123 : echo abc123" \
-    "name-rev --name-only abc123 : echo develop"
+    "rev-parse --is-shallow-repository : echo true" \
+    "fetch --unshallow origin main : " \
+    "merge-base --is-ancestor abc123 origin/main : exit 1"
 
   run "$PWD"/hooks/post-checkout
 
   assert_success
-  assert_output --partial "WARNING: Commit branch (develop) does not match BUILDKITE_BRANCH (main)."
+  assert_output --partial "WARNING: Commit abc123 is not on branch main."
 
   unstub git
 }
@@ -66,13 +81,14 @@ setup() {
   export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="strict"
 
   stub git \
-    "rev-parse abc123 : echo abc123" \
-    "name-rev --name-only abc123 : echo develop"
+    "rev-parse --is-shallow-repository : echo true" \
+    "fetch --unshallow origin main : " \
+    "merge-base --is-ancestor abc123 origin/main : exit 1"
 
   run "$PWD"/hooks/post-checkout
 
   assert_failure
-  assert_output --partial "ERROR: Commit branch (develop) does not match BUILDKITE_BRANCH (main)."
+  assert_output --partial "ERROR: Commit abc123 is not on branch main."
 
   unstub git
 }
@@ -81,8 +97,9 @@ setup() {
   export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="strict"
 
   stub git \
-    "rev-parse abc123 : echo abc123" \
-    "name-rev --name-only abc123 : echo main"
+    "rev-parse --is-shallow-repository : echo true" \
+    "fetch --unshallow origin main : " \
+    "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout
 
