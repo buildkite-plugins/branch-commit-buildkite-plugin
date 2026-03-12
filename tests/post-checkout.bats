@@ -130,6 +130,15 @@ setup() {
   unstub git
 }
 
+@test "Invalid mode fails with error" {
+  export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="invalid"
+
+  run "$PWD"/hooks/post-checkout
+
+  assert_failure
+  assert_output --partial "ERROR: Invalid mode 'invalid'. Must be 'warn' or 'strict'."
+}
+
 @test "Matching branch in strict mode succeeds" {
   export BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE="strict"
 
