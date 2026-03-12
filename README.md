@@ -39,6 +39,10 @@ steps:
           mode: "strict"
 ```
 
+## Shallow clones
+
+When the repository is a shallow clone (e.g., when using the [sparse-checkout plugin](https://github.com/buildkite-plugins/sparse-checkout-buildkite-plugin)), the plugin runs `git fetch --unshallow` to retrieve enough commit history for ancestry validation. In partial clone environments (`--filter=blob:none`), this only downloads commit metadata and is inexpensive. In non-partial shallow clones, this downloads the full repository history, which may be slow on large repositories.
+
 ## Developing
 
 Run tests locally:
