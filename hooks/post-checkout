@@ -32,6 +32,7 @@ fi
 # Fetch branch ref and history so merge-base can walk the commit graph
 fetch_failed=0
 if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+  echo "INFO: Shallow repository detected, performing unshallow operation"
   git fetch --unshallow origin "$BUILDKITE_BRANCH" 2>/dev/null || fetch_failed=1
 else
   git fetch origin "$BUILDKITE_BRANCH" 2>/dev/null || fetch_failed=1
