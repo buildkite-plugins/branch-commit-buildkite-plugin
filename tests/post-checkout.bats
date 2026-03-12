@@ -39,7 +39,7 @@ setup() {
 @test "Commit is on branch in shallow repo succeeds" {
   stub git \
     "rev-parse --is-shallow-repository : echo true" \
-    "fetch --unshallow origin main : " \
+    "fetch --unshallow origin main:refs/remotes/origin/main : " \
     "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout
@@ -55,7 +55,7 @@ setup() {
 @test "Commit is on branch in non-shallow repo succeeds" {
   stub git \
     "rev-parse --is-shallow-repository : echo false" \
-    "fetch origin main : " \
+    "fetch origin main:refs/remotes/origin/main : " \
     "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout
@@ -71,7 +71,7 @@ setup() {
 @test "Branch mismatch in warn mode prints warning" {
   stub git \
     "rev-parse --is-shallow-repository : echo true" \
-    "fetch --unshallow origin main : " \
+    "fetch --unshallow origin main:refs/remotes/origin/main : " \
     "merge-base --is-ancestor abc123 origin/main : exit 1"
 
   run "$PWD"/hooks/post-checkout
@@ -88,7 +88,7 @@ setup() {
 
   stub git \
     "rev-parse --is-shallow-repository : echo true" \
-    "fetch --unshallow origin main : " \
+    "fetch --unshallow origin main:refs/remotes/origin/main : " \
     "merge-base --is-ancestor abc123 origin/main : exit 1"
 
   run "$PWD"/hooks/post-checkout
@@ -103,7 +103,7 @@ setup() {
 @test "Fetch failure in warn mode prints warning" {
   stub git \
     "rev-parse --is-shallow-repository : echo false" \
-    "fetch origin main : exit 128"
+    "fetch origin main:refs/remotes/origin/main : exit 128"
 
   run "$PWD"/hooks/post-checkout
 
@@ -119,7 +119,7 @@ setup() {
 
   stub git \
     "rev-parse --is-shallow-repository : echo false" \
-    "fetch origin main : exit 128"
+    "fetch origin main:refs/remotes/origin/main : exit 128"
 
   run "$PWD"/hooks/post-checkout
 
@@ -144,7 +144,7 @@ setup() {
 
   stub git \
     "rev-parse --is-shallow-repository : echo true" \
-    "fetch --unshallow origin main : " \
+    "fetch --unshallow origin main:refs/remotes/origin/main : " \
     "merge-base --is-ancestor abc123 origin/main : "
 
   run "$PWD"/hooks/post-checkout

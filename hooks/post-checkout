@@ -33,9 +33,9 @@ fi
 fetch_failed=0
 if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
   echo "INFO: Shallow repository detected, performing unshallow operation"
-  git fetch --unshallow origin "$BUILDKITE_BRANCH" || fetch_failed=1
+  git fetch --unshallow origin "$BUILDKITE_BRANCH:refs/remotes/origin/$BUILDKITE_BRANCH" || fetch_failed=1
 else
-  git fetch origin "$BUILDKITE_BRANCH" || fetch_failed=1
+  git fetch origin "$BUILDKITE_BRANCH:refs/remotes/origin/$BUILDKITE_BRANCH" || fetch_failed=1
 fi
 
 echo "+++ :mag: Validating branch commit"
