@@ -108,7 +108,7 @@ setup() {
   run "$PWD"/hooks/post-checkout
 
   assert_success
-  assert_output --partial "WARNING: Commit abc123 is not on branch main."
+  assert_output --partial "WARNING: Could not fetch branch main from origin."
   assert_output --partial "Continuing job..."
 
   unstub git
@@ -124,7 +124,7 @@ setup() {
   run "$PWD"/hooks/post-checkout
 
   assert_failure
-  assert_output --partial "ERROR: Commit abc123 is not on branch main."
+  assert_output --partial "ERROR: Could not fetch branch main from origin."
   assert_output --partial "Failing job..."
 
   unstub git
