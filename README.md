@@ -24,7 +24,7 @@ steps:
   - label: ":pipeline:"
     command: buildkite-agent pipeline upload
     plugins:
-      - branch-commit:
+      - branch-commit#v1.0.0:
           mode: "warn"
 ```
 
@@ -36,7 +36,7 @@ steps:
     - label: ":pipeline:"
       command: buildkite-agent pipeline upload
       plugins:
-        - branch-commit:
+        - branch-commit#v1.0.0:
             mode: "strict"
 ```
 
