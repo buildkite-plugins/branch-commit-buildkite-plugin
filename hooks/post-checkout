@@ -1,28 +1,63 @@
 #!/bin/bash
 
-if [ $BUILDKITE_SOURCE != "ui" ]; then
-    exit 0
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=lib/plugin.bash
+. "$DIR/../lib/plugin.bash"
+
+# Only run for UI-triggered builds
+if [[ "${BUILDKITE_SOURCE:-}" != "ui" ]]; then
+  exit 0
 fi
 
-# Check if the environment variable BUILDKITE_BRANCH is set
-# This should always be the case, but we should handle situations where it isn't
-if [ -z "$BUILDKITE_BRANCH" ]; then
-    echo "ERROR: BUILDKITE_BRANCH environment variable is not set."
+if [[ -z "${BUILDKITE_BRANCH:-}" ]]; then
+  echo "ERROR: BUILDKITE_BRANCH environment variable is not set." >&2
+  exit 1
+fi
+
+if [[ -z "${BUILDKITE_COMMIT:-}" ]]; then
+  echo "ERROR: BUILDKITE_COMMIT environment variable is not set." >&2
+  exit 1
+fi
+
+mode=$(plugin_read_config MODE "strict")
+
+if [[ "$mode" != "warn" && "$mode" != "strict" ]]; then
+  echo "ERROR: Invalid mode '$mode'. Must be 'warn' or 'strict'." >&2
+  exit 1
+fi
+
+# Fetch branch ref and history so merge-base can walk the commit graph
+fetch_failed=0
+if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+  echo "INFO: Shallow repository detected, performing unshallow operation"
+  git fetch --unshallow origin "$BUILDKITE_BRANCH:refs/remotes/origin/$BUILDKITE_BRANCH" || fetch_failed=1
+else
+  git fetch origin "$BUILDKITE_BRANCH:refs/remotes/origin/$BUILDKITE_BRANCH" || fetch_failed=1
+fi
+
+echo "+++ :mag: Validating branch commit"
+
+if [[ "$fetch_failed" -eq 1 ]]; then
+  if [[ "$mode" == "strict" ]]; then
+    echo "ERROR: Could not fetch branch $BUILDKITE_BRANCH from origin." >&2
+    echo "Failing job..."
     exit 1
+  else
+    echo "WARNING: Could not fetch branch $BUILDKITE_BRANCH from origin." >&2
+  fi
+elif ! git merge-base --is-ancestor "$BUILDKITE_COMMIT" "origin/$BUILDKITE_BRANCH"; then
+  if [[ "$mode" == "strict" ]]; then
+    echo "ERROR: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
+    echo "Failing job..."
+    exit 1
+  else
+    echo "WARNING: Commit $BUILDKITE_COMMIT is not on branch $BUILDKITE_BRANCH." >&2
+  fi
+else
+  echo "INFO: Commit $BUILDKITE_COMMIT exists on branch $BUILDKITE_BRANCH." >&2
 fi
 
-# Get the current commit SHA
-current_commit=$(git rev-parse $BUILDKITE_COMMIT)
-
-# Get the branch name of the commit SHA
-commit_branch=$(git name-rev --name-only $current_commit)
-
-# Check if the current branch name matches BUILDKITE_BRANCH
-if [ "$commit_branch" != "$BUILDKITE_BRANCH" ]; then
-    if [ "$BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE" == "strict" ]; then
-        echo "ERROR: Commit branch ($commit_branch) does not match BUILDKITE_BRANCH ($BUILDKITE_BRANCH)."
-        exit 1
-    elif [ "$BUILDKITE_PLUGIN_BRANCH_COMMIT_MODE" == "warn" ]; then
-        echo -e "\033[0;33mWARNING: Commit branch ($commit_branch) does not match BUILDKITE_BRANCH ($BUILDKITE_BRANCH).\033[0m"
-    fi
-fi
+echo "Continuing job..."

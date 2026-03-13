@@ -1,19 +1,19 @@
-# Branch Commit Buildkite Plugin 
+# Branch Commit Buildkite Plugin
 
-A Buildkite plugin to check that the build commit is on the set branch
+A Buildkite plugin that verifies the build commit exists on the specified branch. Designed for UI-triggered builds where a user may select a commit that doesn't belong to the target branch.
+
+The plugin only runs when `BUILDKITE_SOURCE` is `ui`. For all other build sources it exits immediately.
 
 ## Options
 
-These are all the options available to configure this plugin's behaviour.
-
-### Required
+### Optional
 
 #### `mode` (string)
 
-This can be either `warn` or `strict`.
- 
-- `warn` will output a warning that the current set `BUILDKITE_BRANCH` is not where the build commit is located but continue the build
-- `strict` will fail the build in the above scenario
+Controls what happens when the commit is not found on the branch. Defaults to `strict`.
+
+- `warn` — logs a warning and continues the build
+- `strict` — fails the build with an error
 
 ## Examples
 
@@ -24,34 +24,52 @@ steps:
   - label: ":pipeline:"
     command: buildkite-agent pipeline upload
     plugins:
-      - branch-commit:
+      - branch-commit#v1.0.0:
           mode: "warn"
 ```
 
-In `strict` mode:
+In `strict` mode (the default — `mode` can be omitted):
 
 ```yaml
 steps:
-  steps:
-    - label: ":pipeline:"
-      command: buildkite-agent pipeline upload
-      plugins:
-        - branch-commit:
-            mode: "strict"
+  - label: ":pipeline:"
+    command: buildkite-agent pipeline upload
+    plugins:
+      - branch-commit#v1.0.0:
+          mode: "strict"
 ```
 
-## ⚒ Developing
+## Shallow clones
 
-You can use the [bk cli](https://github.com/buildkite/cli) to run the [pipeline](.buildkite/pipeline.yml) locally:
+When the repository is a shallow clone (e.g., when using the [sparse-checkout plugin](https://github.com/buildkite-plugins/sparse-checkout-buildkite-plugin)), the plugin runs `git fetch --unshallow` to retrieve enough commit history for ancestry validation. In partial clone environments (`--filter=blob:none`), this only downloads commit metadata and is inexpensive. In non-partial shallow clones, this downloads the full repository history, which may be slow on large repositories.
+
+## Developing
+
+Run tests locally:
 
 ```bash
-bk local run
+docker run -it --rm -v "$PWD:/plugin:ro" buildkite/plugin-tester
 ```
 
-## 👩‍💻 Contributing
+Run shellcheck:
 
-Your policy on how to contribute to the plugin!
+```bash
+docker run --rm -v "$PWD:/mnt" --workdir "/mnt" koalaman/shellcheck:stable hooks/* lib/*.bash
+```
 
-## 📜 License
+Validate plugin structure:
+
+```bash
+docker run -it --rm -v "$PWD:/plugin:ro" buildkite/plugin-linter --id branch-commit --path /plugin
+```
+
+## Contributing
+
+1. Fork the repository and create a feature branch
+2. Add tests for any new functionality
+3. Ensure all tests pass and shellcheck reports no warnings
+4. Open a pull request
+
+## License
 
 The package is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

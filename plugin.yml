@@ -1,5 +1,5 @@
-name: Commit Branch Buildkite Plugin
-description: Checks that a commit it present on the branch defined by the BUILDKITE_BRANCH variable. Best suited for UI builds.
+name: Branch Commit Buildkite Plugin
+description: Checks that a commit is present on the branch defined by the BUILDKITE_BRANCH variable. Best suited for UI builds.
 author: https://github.com/buildkite-plugins
 requirements:
   - bash
@@ -7,6 +7,9 @@ configuration:
   properties:
     mode:
       type: string
-  required:
-    - mandatory
+      description: "Validation mode. In strict mode, a branch mismatch fails the build. In warn mode, it logs a warning."
+      enum:
+        - warn
+        - strict
+      default: "strict"
   additionalProperties: false
