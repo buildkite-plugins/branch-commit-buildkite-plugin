@@ -4,6 +4,9 @@ A Buildkite plugin that verifies the build commit exists on the specified branch
 
 The plugin only runs when `BUILDKITE_SOURCE` is `ui`. For all other build sources it exits immediately.
 
+**Note: The functionality of this plugin is now available natively in Buildkite Pipelines.** See the Buildkite [Git Checkout docs](https://buildkite.com/docs/pipelines/configure/git-checkout)
+for more details.
+
 ## Options
 
 ### Optional
