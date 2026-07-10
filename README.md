@@ -1,5 +1,18 @@
 # Branch Commit Buildkite Plugin
 
+> [!WARNING]
+> **This plugin is deprecated.** Commit verification is now supported natively by the Buildkite Agent via the `checkout.commit_verification` attribute on [command steps](https://buildkite.com/docs/pipelines/configure/step-types/command-step), which supports the same `strict` and `warn` modes:
+>
+> ```yaml
+> steps:
+>   - label: ":pipeline:"
+>     command: buildkite-agent pipeline upload
+>     checkout:
+>       commit_verification: strict
+> ```
+>
+> Please migrate to the native functionality instead of using this plugin.
+
 A Buildkite plugin that verifies the build commit exists on the specified branch. Designed for UI-triggered builds where a user may select a commit that doesn't belong to the target branch.
 
 The plugin only runs when `BUILDKITE_SOURCE` is `ui`. For all other build sources it exits immediately.
