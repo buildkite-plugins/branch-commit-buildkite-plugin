@@ -3,7 +3,7 @@
 > [!WARNING]
 > **This plugin is deprecated.** Commit verification is now supported natively by the Buildkite Agent via the `checkout.commit_verification` attribute on [command steps](https://buildkite.com/docs/pipelines/configure/step-types/command-step), which supports the same `strict` and `warn` modes.
 >
-> Please migrate to the native functionality instead of using this plugin. Native commit verification requires Buildkite agent v3.136.0 or later. See [Commit verification](https://buildkite.com/docs/pipelines/configure/git-checkout#commit-verification) and [Migrating from checkout plugins](https://buildkite.com/docs/pipelines/configure/git-checkout#migrating-from-checkout-plugins).
+> Please migrate to the native functionality instead of using this plugin. Native commit verification requires Buildkite agent v3.136.0 or later running with [`checkout-override-mode=none`](https://buildkite.com/docs/pipelines/configure/git-checkout#agent-checkout-override-mode). The default `from-job` mode ignores it, and Buildkite hosted agents cannot use `none` mode, so keep using this plugin on those agents. See [Commit verification](https://buildkite.com/docs/pipelines/configure/git-checkout#commit-verification) and [Migrating from checkout plugins](https://buildkite.com/docs/pipelines/configure/git-checkout#migrating-from-checkout-plugins).
 
 Native equivalent:
 
